@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pam
+    username: pam
+    password: pam
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+pam:
+  seed:
+    enabled: true     # Beispieldaten fuer Entwicklung und Screenshots.

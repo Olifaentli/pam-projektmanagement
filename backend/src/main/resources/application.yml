@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: pam
+  profiles:
+    active: dev
+  jpa:
+    hibernate:
+      ddl-auto: validate      # Das Schema kommt ausschliesslich von Flyway.
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+  error:
+    include-message: never    # Keine internen Details nach aussen (Lektion 2.4).
+    include-stacktrace: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    de.iu.pam: DEBUG

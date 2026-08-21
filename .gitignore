@@ -1,0 +1,37 @@
+# Java / Maven
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+coverage/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+
+# Anwendung
+*.log
+data/
+*.db
+*.mv.db
+*.trace.db
+.env
+
+# IU-Kursunterlagen: urheberrechtlich geschuetzt, nicht ins oeffentliche Repo
+doc/

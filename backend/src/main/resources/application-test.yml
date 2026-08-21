@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:pam;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ''
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+
+pam:
+  seed:
+    enabled: false    # Tests bauen ihre Daten selbst auf.
+
+logging:
+  level:
+    de.iu.pam: INFO
