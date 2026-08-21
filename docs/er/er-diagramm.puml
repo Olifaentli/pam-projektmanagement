@@ -1,0 +1,108 @@
+@startuml er-diagramm
+' Entity-Relationship-Diagramm des Datenbankschemas
+' Fallstudie DLBITOWAWBI01 - erzeugt aus den Flyway-Migrationen V1 und V2
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam nodesep 45
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #F8FAFC
+  BorderColor #1F4E79
+  HeaderBackgroundColor #1F4E79
+  FontColor #1B1B1B
+  ArrowColor #1F4E79
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #B45309
+}
+hide circle
+
+title Datenbankschema (ER-Diagramm)
+
+entity "tenant" as tenant {
+  * **id** : BIGINT <<PK, identity>>
+  --
+  * name : VARCHAR(255)
+  * slug : VARCHAR(255) <<UK>>
+}
+
+entity "app_user" as user {
+  * **id** : BIGINT <<PK, identity>>
+  --
+  * tenant_id : BIGINT <<FK>>
+  * email : VARCHAR(255) <<UK>>
+  * password_hash : VARCHAR(255)
+  * first_name : VARCHAR(255)
+  * last_name : VARCHAR(255)
+  * enabled : BOOLEAN
+}
+
+entity "user_role" as userrole {
+  * **user_id** : BIGINT <<PK, FK>>
+  * **role** : VARCHAR(32) <<PK>>
+}
+
+entity "project" as project {
+  * **id** : BIGINT <<PK, identity>>
+  --
+  * tenant_id : BIGINT <<FK>>
+  * name : VARCHAR(255)
+  description : VARCHAR(2000)
+  * status : VARCHAR(32)
+  start_date : DATE
+  end_date : DATE
+  * created_at : TIMESTAMP
+}
+
+entity "project_membership" as membership {
+  * **id** : BIGINT <<PK, identity>>
+  --
+  * tenant_id : BIGINT <<FK>>
+  * project_id : BIGINT <<FK>>
+  * user_id : BIGINT <<FK>>
+  --
+  UK (project_id, user_id)
+}
+
+entity "task" as task {
+  * **id** : BIGINT <<PK, identity>>
+  --
+  * tenant_id : BIGINT <<FK>>
+  * project_id : BIGINT <<FK>>
+  * title : VARCHAR(255)
+  description : VARCHAR(2000)
+  * status : VARCHAR(32)
+  assignee_id : BIGINT <<FK>>
+  due_date : DATE
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+tenant ||--o{ user : "tenant_id"
+tenant ||--o{ project : "tenant_id"
+tenant ||--o{ membership : "tenant_id"
+tenant ||--o{ task : "tenant_id"
+
+user ||--o{ userrole : "user_id\nON DELETE CASCADE"
+project ||--o{ membership : "project_id\nON DELETE CASCADE"
+user ||--o{ membership : "user_id\nON DELETE CASCADE"
+project ||--o{ task : "project_id\nON DELETE CASCADE"
+user |o--o{ task : "assignee_id"
+
+note bottom of tenant
+  Jede fachliche Tabelle trägt eine tenant_id.
+  Damit ist die Anwendung mandantenfähig
+  vorbereitet, ohne bereits mehrere Mandanten
+  im Betrieb führen zu müssen.
+end note
+
+note bottom of task
+  Es gibt bewusst **keine** Spalte für den
+  Projektfortschritt. Er wird bei jedem Abruf
+  aus den task.status-Werten gezählt und
+  kann deshalb nicht veralten.
+end note
+
+@enduml

@@ -1,0 +1,137 @@
+@startuml klassendiagramm
+' UML-Strukturdiagramm des Domaenenmodells
+' Fallstudie DLBITOWAWBI01 - Projekt- und Aufgabenmanagementsystem
+
+skinparam backgroundColor #FFFFFF
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam nodesep 55
+skinparam ranksep 55
+skinparam class {
+  BackgroundColor #F8FAFC
+  BorderColor #1F4E79
+  ArrowColor #1F4E79
+  HeaderBackgroundColor #1F4E79
+  FontColor #1B1B1B
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #B45309
+}
+
+title Domänenmodell (UML-Klassendiagramm)
+
+class Tenant <<Entity>> {
+  - id : Long
+  - name : String
+  - slug : String
+}
+
+abstract class BaseTenantEntity <<MappedSuperclass>> {
+  - id : Long
+  - tenantId : Long
+  --
+  # stampTenant() : void
+}
+
+class User <<Entity>> {
+  - email : String
+  - passwordHash : String
+  - firstName : String
+  - lastName : String
+  - enabled : boolean
+  - roles : Set<Role>
+  --
+  + getFullName() : String
+  + hasRole(Role) : boolean
+}
+
+class Project <<Entity>> {
+  - name : String
+  - description : String
+  - status : ProjectStatus
+  - startDate : LocalDate
+  - endDate : LocalDate
+  - createdAt : Instant
+  --
+  + archive() : void
+  + reactivate() : void
+  + isArchived() : boolean
+}
+
+class ProjectMembership <<Entity>> {
+  - projectId : Long
+  - userId : Long
+}
+
+class Task <<Entity>> {
+  - projectId : Long
+  - title : String
+  - description : String
+  - status : TaskStatus
+  - assigneeId : Long
+  - dueDate : LocalDate
+  - createdAt : Instant
+  - updatedAt : Instant
+}
+
+enum Role <<enumeration>> {
+  ADMIN
+  PROJECT_MANAGER
+  EMPLOYEE
+  --
+  + authority() : String
+}
+
+enum ProjectStatus <<enumeration>> {
+  ACTIVE
+  ARCHIVED
+}
+
+enum TaskStatus <<enumeration>> {
+  OPEN
+  IN_PROGRESS
+  DONE
+  --
+  + getLabel() : String
+}
+
+' --- Vererbung: alle fachlichen Entitaeten sind mandantengebunden ---
+Tenant "1" --> "0..*" BaseTenantEntity : umfasst
+BaseTenantEntity <|-- Project
+BaseTenantEntity <|-- User
+BaseTenantEntity <|-- ProjectMembership
+BaseTenantEntity <|-- Task
+
+' --- Fachliche Beziehungen ---
+Project "1" --> "0..*" ProjectMembership : besteht aus
+ProjectMembership "0..*" <-- "1" User : ist zugeordnet
+Project "1" --> "0..*" Task : enthält
+Task "0..*" --> "0..1" User : zuständig
+
+' --- Wertebereiche ---
+User "1" -right-> "1..*" Role
+Project "1" -left-> "1" ProjectStatus
+Task "1" -right-> "1" TaskStatus
+
+note top of BaseTenantEntity
+  Stempelt die tenantId beim Anlegen automatisch
+  aus dem TenantContext. Die Mandantenzuordnung
+  kann so an keiner Aufrufstelle vergessen werden.
+end note
+
+note bottom of ProjectMembership
+  Bewusst eigene Entität statt @ManyToMany:
+  die Zuordnung bleibt erweiterbar, etwa um
+  eine Projektrolle oder ein Zuordnungsdatum.
+end note
+
+note bottom of Task
+  **Der Fortschritt (US-6) wird nicht gespeichert.**
+  ProjectService berechnet ihn bei jedem Abruf aus
+  den Task-Zuständen. Ein gespeicherter Wert könnte
+  von der Realität abweichen, sobald eine Aufgabe
+  außerhalb des erwarteten Weges geändert wird.
+end note
+
+@enduml

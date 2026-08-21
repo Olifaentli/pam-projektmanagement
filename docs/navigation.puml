@@ -1,0 +1,74 @@
+@startuml navigation
+' Seitenuebergaenge der Anwendung
+' Fallstudie DLBITOWAWBI01
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #F8FAFC
+  BorderColor #1F4E79
+  FontColor #1B1B1B
+  ArrowColor #1F4E79
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #B45309
+}
+
+title Navigation zwischen den Webseiten
+
+[*] --> Anmeldung
+
+state "Anmeldung\n/login" as Anmeldung
+state "Übersicht\n/" as Uebersicht
+state "Projektliste\n/projects" as Projektliste
+state "Projektdetail\n/projects/:id" as Projektdetail
+state "Benutzerverwaltung\n/admin/users" as Benutzerverwaltung
+state "Nicht gefunden\n/404" as NotFound
+
+Anmeldung --> Uebersicht : erfolgreiche Anmeldung
+Anmeldung --> Anmeldung : falsche Zugangsdaten\n(Fehlermeldung im Formular)
+
+Uebersicht --> Projektliste : Seitennavigation „Projekte“
+Uebersicht --> Projektdetail : Klick auf Projektkachel
+Uebersicht --> Benutzerverwaltung : Seitennavigation\n(nur Rolle ADMIN)
+
+Projektliste --> Uebersicht : Seitennavigation „Übersicht“
+Projektliste --> Projektdetail : Klick auf Projektkarte
+Projektliste --> Projektliste : Filter aktiv / archiviert / alle,\nDialog „Projekt anlegen“
+
+Projektdetail --> Projektliste : „Zurück zur Projektliste“
+Projektdetail --> Projektdetail : Aufgabe anlegen, Status ändern,\nMitarbeitende zuordnen, archivieren
+
+Benutzerverwaltung --> Uebersicht : Seitennavigation
+Benutzerverwaltung --> Benutzerverwaltung : Konto anlegen,\nRolle ändern, Konto löschen
+
+Uebersicht --> Anmeldung : Abmelden
+Projektliste --> Anmeldung : Abmelden
+Projektdetail --> Anmeldung : Abmelden
+Benutzerverwaltung --> Anmeldung : Abmelden
+
+NotFound --> Uebersicht : „Zur Übersicht“
+
+note right of Anmeldung
+  Alle Seiten außer /login liegen hinter
+  ProtectedRoute. Ein Direktaufruf ohne
+  gültige Sitzung führt hierher zurück;
+  das ursprüngliche Ziel wird gemerkt und
+  nach der Anmeldung angesprungen.
+end note
+
+note bottom of Benutzerverwaltung
+  Für andere Rollen ist dieser Eintrag
+  nicht sichtbar (RoleGate) und der
+  Direktaufruf wird umgeleitet. Verbindlich
+  entscheidet aber das Backend mit 403.
+end note
+
+note bottom of NotFound
+  Unbekannte Adressen werden auf /404
+  umgeleitet. Kopf- und Seitennavigation
+  bleiben dabei erhalten.
+end note
+
+@enduml

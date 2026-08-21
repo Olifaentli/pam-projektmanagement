@@ -1,0 +1,107 @@
+@startuml komponentendiagramm
+' UML-Komponentendiagramm: Schichtenarchitektur der Anwendung
+' Fallstudie DLBITOWAWBI01
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam component {
+  BackgroundColor #F8FAFC
+  BorderColor #1F4E79
+  FontColor #1B1B1B
+}
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #94A3B8
+  FontColor #1F4E79
+}
+skinparam database {
+  BackgroundColor #F8FAFC
+  BorderColor #1F4E79
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #B45309
+  MaxMessageSize 260
+}
+
+title Softwarearchitektur (UML-Komponentendiagramm)
+
+actor "Benutzer:in" as user
+
+package "Client — Browser" as client {
+  package "Präsentationsschicht (React + MUI)" as praesentation {
+    [Seiten und Navigation\nLogin · Übersicht · Projekte\nProjektdetail · Benutzerverwaltung] as pages
+    [Zustandsverwaltung\nAuthContext · useAsyncData\nauf Basis von useReducer] as state
+    [API-Client\nfetch · CSRF-Header · Fehlerabbildung] as apiclient
+  }
+}
+
+package "Server — Spring Boot (modularer Monolith)" as server {
+
+  package "Querschnitt (Filterkette)" as crosscutting {
+    [SecurityConfig\nSecurityFilterChain · BCrypt · CSRF] as security
+    [TenantContextFilter\nsetzt TenantContext je Request] as tenant
+  }
+
+  package "Anwendungsschicht (Web)" as weblayer {
+    [REST-Controller\nAuth · Project · Task · User] as controllers
+    [DTOs mit Bean Validation] as dtos
+    [GlobalExceptionHandler\n@RestControllerAdvice] as errors
+  }
+
+  package "Geschäftslogikschicht (Services)" as servicelayer {
+    [ProjectService\nu. a. Fortschrittsberechnung] as projectsvc
+    [TaskService] as tasksvc
+    [UserService] as usersvc
+    [ProjectAccessService\nobjektbezogene Autorisierung] as accesssvc
+  }
+
+  package "Persistenzschicht (Spring Data JPA)" as persistence {
+    [Repositories\nJpaRepository, mandantengebunden] as repos
+    [Entities\n@Entity · Hibernate] as entities
+  }
+}
+
+database "PostgreSQL\nSchema versioniert über Flyway" as db
+
+user --> pages
+pages --> state
+state --> apiclient
+apiclient --> security : HTTPS · JSON über REST
+
+security --> tenant : nach erfolgreicher\nAuthentifizierung
+tenant --> controllers
+
+controllers --> dtos : validiert über
+controllers --> accesssvc : @PreAuthorize
+controllers --> projectsvc
+controllers --> tasksvc
+controllers --> usersvc
+controllers ..> errors : Exceptions
+
+projectsvc --> repos
+tasksvc --> repos
+usersvc --> repos
+accesssvc --> repos
+
+repos --> entities
+entities --> db : JDBC
+
+note right of crosscutting
+  Zweistufige Autorisierung:
+  1. Rollenprüfung in der SecurityFilterChain
+     und über @PreAuthorize("hasRole(...)")
+  2. Objektbezug über @projectAccess.canRead(#id)
+  Erst beides zusammen erfüllt US-8.
+end note
+
+note right of db
+  Der Anwendungscode enthält kein SQL.
+  Deshalb laufen die Integrationstests
+  gegen H2 statt PostgreSQL, ohne dass
+  sich am Code etwas ändert (ORM, Lektion 2.5).
+end note
+
+@enduml

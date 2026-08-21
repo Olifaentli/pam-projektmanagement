@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Werkzeuge für die Dokumentation der Fallstudie (Screenshots).",
   "scripts": {
-    "screenshots": "node docs/screenshots/capture.mjs"
+    "screenshots": "node docs/screenshots/capture.mjs",
+    "wireframes": "python3 docs/wireframes/wireframe.py && node docs/wireframes/render.mjs",
+    "diagramme": "bash docs/uml/render.sh"
   },
   "devDependencies": {
     "playwright": "^1.56.0"

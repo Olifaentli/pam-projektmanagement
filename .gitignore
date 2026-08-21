@@ -38,3 +38,6 @@ doc/
 
 # Playwright-Browser
 .cache/
+
+# PlantUML-Binaerdatei: wird von docs/uml/render.sh bei Bedarf geladen
+docs/uml/plantuml.jar
