@@ -1,0 +1,72 @@
+# Automatischer Build- und Testlauf bei jedem Push.
+#
+# Zweck für die Fallstudie: Der Nachweis "die Software ist getestet" soll nicht
+# auf der Aussage der Entwicklerin beruhen, sondern auf einem reproduzierbaren
+# Lauf auf einer frischen Maschine.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  backend:
+    name: Backend (Java 21, Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      # Die Integrationstests laufen gegen H2 im Testprofil. Eine echte
+      # PostgreSQL-Instanz ist dafür nicht nötig, weil der gesamte
+      # Datenzugriff über JPA abstrahiert ist.
+      - name: Bauen und testen
+        working-directory: backend
+        run: mvn -B verify
+
+      - name: Testberichte sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-testberichte
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+            backend/target/site/jacoco/
+          if-no-files-found: ignore
+
+  frontend:
+    name: Frontend (Node 22, Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node 22 einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Typen prüfen
+        run: npm run typecheck
+
+      - name: Tests ausführen
+        run: npm run test:coverage
+
+      - name: Produktionsbuild erstellen
+        run: npm run build
