@@ -92,7 +92,7 @@ public class SecurityConfig {
                                         "Anmeldung erforderlich.", request.getRequestURI()))
                         .accessDeniedHandler((request, response, ex) ->
                                 writeError(response, HttpStatus.FORBIDDEN, "Forbidden",
-                                        "Fuer diese Aktion fehlt die Berechtigung.", request.getRequestURI())))
+                                        "Für diese Aktion fehlt die Berechtigung.", request.getRequestURI())))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable);

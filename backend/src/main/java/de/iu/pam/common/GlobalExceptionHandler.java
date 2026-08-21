@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiError.withFields(
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
-                "Die uebermittelten Daten sind unvollstaendig oder ungueltig.",
+                "Die übermittelten Daten sind unvollständig oder ungültig.",
                 request.getRequestURI(),
                 fields));
     }
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
                                                        HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of(
                 HttpStatus.FORBIDDEN.value(), "Forbidden",
-                "Fuer diese Aktion fehlt die Berechtigung.", request.getRequestURI()));
+                "Für diese Aktion fehlt die Berechtigung.", request.getRequestURI()));
     }
 
     /**

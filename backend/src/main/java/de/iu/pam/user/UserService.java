@@ -3,6 +3,7 @@ package de.iu.pam.user;
 import de.iu.pam.common.ConflictException;
 import de.iu.pam.common.NotFoundException;
 import de.iu.pam.project.ProjectMembershipRepository;
+import de.iu.pam.project.dto.MemberResponse;
 import de.iu.pam.tenant.TenantContext;
 import de.iu.pam.user.dto.CreateUserRequest;
 import de.iu.pam.user.dto.UpdateRolesRequest;
@@ -41,6 +42,21 @@ public class UserService {
                 .findAllByTenantIdOrderByLastNameAscFirstNameAsc(TenantContext.requireTenantId())
                 .stream()
                 .map(UserResponse::from)
+                .toList();
+    }
+
+    /**
+     * Reduzierte Liste fuer Auswahlfelder (US-3). Enthaelt nur Name und
+     * E-Mail, damit die Projektleitung nicht ueber diesen Weg an Rollen oder
+     * den Aktivierungsstatus fremder Konten kommt.
+     */
+    @Transactional(readOnly = true)
+    public List<MemberResponse> findDirectory() {
+        return userRepository
+                .findAllByTenantIdOrderByLastNameAscFirstNameAsc(TenantContext.requireTenantId())
+                .stream()
+                .filter(User::isEnabled)
+                .map(MemberResponse::from)
                 .toList();
     }
 

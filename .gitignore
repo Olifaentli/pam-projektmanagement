@@ -35,3 +35,6 @@ data/
 
 # IU-Kursunterlagen: urheberrechtlich geschuetzt, nicht ins oeffentliche Repo
 doc/
+
+# Playwright-Browser
+.cache/
