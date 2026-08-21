@@ -41,3 +41,7 @@ doc/
 
 # PlantUML-Binaerdatei: wird von docs/uml/render.sh bei Bedarf geladen
 docs/uml/plantuml.jar
+
+# Schreibgeruest fuer die Pruefungsleistung: persoenliches Arbeitsmaterial,
+# keine Softwaredokumentation und nicht fuer das oeffentliche Repository
+docs/textteil-schreibgeruest.md
