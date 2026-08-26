@@ -50,11 +50,34 @@ export function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: 'background.default',
         p: 2,
+        // Verlauf in den Markenfarben statt einer leeren Flaeche. Die
+        // Anmeldeseite ist der erste Eindruck der Anwendung.
+        background:
+          'radial-gradient(1200px 600px at 15% 10%, #1B4E7C 0%, transparent 55%),' +
+          'radial-gradient(900px 500px at 85% 90%, #0E8074 0%, transparent 50%),' +
+          'linear-gradient(140deg, #0A2440 0%, #123A5F 60%, #10405F 100%)',
       }}
     >
-      <Paper elevation={2} sx={{ p: 4, width: '100%', maxWidth: 420 }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 3, sm: 4.5 },
+          width: '100%',
+          maxWidth: 440,
+          borderRadius: 4,
+          boxShadow: '0 24px 60px rgba(4, 20, 38, .35)',
+        }}
+      >
+        <Box
+          sx={{
+            width: 46,
+            height: 5,
+            borderRadius: 999,
+            mb: 2.5,
+            background: 'linear-gradient(90deg, #123A5F 0%, #0E8074 100%)',
+          }}
+        />
         <Typography variant="h1" gutterBottom>
           Anmeldung
         </Typography>
@@ -74,6 +97,7 @@ export function LoginPage() {
               required
               fullWidth
               autoFocus
+              size="medium"
               slotProps={{ htmlInput: { 'aria-label': 'E-Mail' } }}
             />
             <TextField
@@ -84,6 +108,7 @@ export function LoginPage() {
               autoComplete="current-password"
               required
               fullWidth
+              size="medium"
               slotProps={{ htmlInput: { 'aria-label': 'Passwort' } }}
             />
             <Button

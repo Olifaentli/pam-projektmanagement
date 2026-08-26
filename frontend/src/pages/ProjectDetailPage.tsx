@@ -39,6 +39,8 @@ import { useAsyncData } from '../hooks/useAsyncData'
 import { useAuth } from '../auth/AuthContext'
 import { ProgressBar } from '../components/ProgressBar'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { StatusDot } from '../components/StatusIndicator'
+import { STATUS_COLORS } from '../theme'
 import { TASK_STATUSES } from '../api/types'
 import type { Member, Project, Task, TaskStatusName } from '../api/types'
 
@@ -202,12 +204,37 @@ export function ProjectDetailPage() {
           const columnTasks = (tasks.data ?? []).filter((t) => t.status === column.value)
           return (
             <Grid key={column.value} size={{ xs: 12, md: 4 }}>
-              <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50', height: '100%' }}>
-                <Stack direction="row" sx={{ justifyContent: "space-between", mb: 1.5 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    {column.label}
-                  </Typography>
-                  <Chip size="small" label={columnTasks.length} />
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  height: '100%',
+                  bgcolor: STATUS_COLORS[column.value].soft,
+                  borderColor: `${STATUS_COLORS[column.value].main}33`,
+                }}
+              >
+                <Stack
+                  direction="row"
+                  sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}
+                >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    <StatusDot status={column.value} size={11} />
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 700, color: STATUS_COLORS[column.value].text }}
+                    >
+                      {column.label}
+                    </Typography>
+                  </Stack>
+                  <Chip
+                    size="small"
+                    label={columnTasks.length}
+                    sx={{
+                      bgcolor: '#fff',
+                      color: STATUS_COLORS[column.value].text,
+                      border: `1px solid ${STATUS_COLORS[column.value].main}33`,
+                    }}
+                  />
                 </Stack>
                 <Stack spacing={1.5}>
                   {columnTasks.length === 0 && (
@@ -216,7 +243,13 @@ export function ProjectDetailPage() {
                     </Typography>
                   )}
                   {columnTasks.map((task) => (
-                    <Card key={task.id}>
+                    <Card
+                      key={task.id}
+                      sx={{
+                        borderLeft: `4px solid ${STATUS_COLORS[task.status].main}`,
+                        bgcolor: '#fff',
+                      }}
+                    >
                       <CardContent sx={{ pb: 1.5 }}>
                         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                           <Typography variant="body1" sx={{ fontWeight: 500 }}>
@@ -247,7 +280,10 @@ export function ProjectDetailPage() {
                         >
                           {TASK_STATUSES.map((s) => (
                             <MenuItem key={s.value} value={s.value}>
-                              {s.label}
+                              <Stack direction="row" spacing={1.2} sx={{ alignItems: 'center' }}>
+                                <StatusDot status={s.value} size={9} />
+                                <span>{s.label}</span>
+                              </Stack>
                             </MenuItem>
                           ))}
                         </Select>

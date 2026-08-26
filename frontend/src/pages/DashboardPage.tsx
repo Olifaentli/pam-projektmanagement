@@ -4,6 +4,7 @@ import { projectApi } from '../api/endpoints'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useAuth } from '../auth/AuthContext'
 import { ProgressBar } from '../components/ProgressBar'
+import { STATUS_COLORS } from '../theme'
 import type { Project } from '../api/types'
 
 /** Einstiegsseite mit Kennzahlen ueber die sichtbaren Projekte. */
@@ -25,11 +26,13 @@ export function DashboardPage() {
   const doneTasks = projects.reduce((sum, p) => sum + p.progress.done, 0)
   const openTasks = totalTasks - doneTasks
 
+  // Die Kennzahlen greifen dieselben Ampelfarben auf wie die Aufgabenstatus,
+  // damit Farbe in der gesamten Anwendung dasselbe bedeutet.
   const tiles = [
-    { label: 'Aktive Projekte', value: active.length },
-    { label: 'Archivierte Projekte', value: projects.length - active.length },
-    { label: 'Offene Aufgaben', value: openTasks },
-    { label: 'Erledigte Aufgaben', value: doneTasks },
+    { label: 'Aktive Projekte', value: active.length, color: '#123A5F' },
+    { label: 'Archivierte Projekte', value: projects.length - active.length, color: STATUS_COLORS.OPEN.main },
+    { label: 'Offene Aufgaben', value: openTasks, color: STATUS_COLORS.IN_PROGRESS.main },
+    { label: 'Erledigte Aufgaben', value: doneTasks, color: STATUS_COLORS.DONE.main },
   ]
 
   return (
@@ -44,9 +47,9 @@ export function DashboardPage() {
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {tiles.map((tile) => (
           <Grid key={tile.label} size={{ xs: 6, md: 3 }}>
-            <Card>
+            <Card sx={{ borderTop: `3px solid ${tile.color}` }}>
               <CardContent>
-                <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                <Typography variant="h4" sx={{ fontWeight: 700, color: tile.color }}>
                   {tile.value}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">

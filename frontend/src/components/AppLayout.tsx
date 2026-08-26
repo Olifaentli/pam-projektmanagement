@@ -89,7 +89,13 @@ export function AppLayout() {
             {navItems.map((item) => (
               <ListItemButton
                 key={item.path}
-                selected={location.pathname === item.path}
+                // Eine Unterseite markiert den übergeordneten Eintrag mit:
+                // /projects/7 soll "Projekte" hervorheben, nicht gar nichts.
+                selected={
+                  item.path === '/'
+                    ? location.pathname === '/'
+                    : location.pathname.startsWith(item.path)
+                }
                 onClick={() => navigate(item.path)}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
