@@ -19,20 +19,34 @@ function statusOf(percent: number, total: number): keyof typeof STATUS_COLORS {
   return 'IN_PROGRESS'
 }
 
-export function ProgressBar({ progress, height = 6 }: { progress: Progress; height?: number }) {
+export function ProgressBar({
+  progress,
+  height = 6,
+  showHeader = true,
+  showCaption = true,
+}: {
+  progress: Progress
+  height?: number
+  /** Zeile mit Beschriftung und Prozentwert oberhalb des Balkens. */
+  showHeader?: boolean
+  /** Zeile "x von y Aufgaben erledigt" unterhalb des Balkens. */
+  showCaption?: boolean
+}) {
   const { total, done, percentDone } = progress
   const status = statusOf(percentDone, total)
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.75 }}>
-        <Typography variant="body2" color="text.secondary">
-          Fortschritt
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 700, color: STATUS_ACCENT[status] }}>
-          {percentDone} %
-        </Typography>
-      </Box>
+      {showHeader && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.75 }}>
+          <Typography variant="body2" color="text.secondary">
+            Fortschritt
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 700, color: STATUS_ACCENT[status] }}>
+            {percentDone} %
+          </Typography>
+        </Box>
+      )}
       <Tooltip title={`${done} von ${total} Aufgaben erledigt`}>
         <LinearProgress
           variant="determinate"
@@ -44,9 +58,11 @@ export function ProgressBar({ progress, height = 6 }: { progress: Progress; heig
           aria-label={`Fortschritt ${percentDone} Prozent, ${done} von ${total} Aufgaben erledigt`}
         />
       </Tooltip>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-        {done} von {total} Aufgaben erledigt
-      </Typography>
+      {showCaption && (
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+          {done} von {total} Aufgaben erledigt
+        </Typography>
+      )}
     </Box>
   )
 }

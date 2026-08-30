@@ -115,7 +115,9 @@ export function ProjectListPage() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {project.description ?? 'Keine Beschreibung hinterlegt.'}
                   </Typography>
-                  <ProgressBar progress={project.progress} />
+                  {/* Prozentwert steht bereits oben rechts, die Zahlen stehen
+                      in der Fußzeile - der Balken bleibt hier ohne Beschriftung. */}
+                  <ProgressBar progress={project.progress} showHeader={false} showCaption={false} />
                   <Stack
                     direction="row"
                     sx={{ justifyContent: 'space-between', mt: 1, fontSize: 12, color: '#8A94A2' }}

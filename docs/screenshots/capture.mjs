@@ -28,6 +28,9 @@ async function login(page, email) {
 }
 
 async function shot(page, name) {
+  // Mauszeiger aus dem Weg räumen: bleibt er über einem Element stehen,
+  // landet dessen Tooltip oder Hover-Zustand mit auf der Aufnahme.
+  await page.mouse.move(0, 0)
   await page.waitForTimeout(600)
   await page.screenshot({ path: join(OUT, `${name}.png`), fullPage: true })
   console.log('  ✓', `${name}.png`)
