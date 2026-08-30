@@ -44,10 +44,21 @@ geführt hätte (siehe [ADR-005](adr/ADR-005-fortschritt-berechnen.md)).
 Screenshots und Wireframes entstehen über Skripte (`docs/screenshots/capture.mjs`,
 `docs/wireframes/wireframe.py`) statt von Hand. Ändert sich die Oberfläche, genügt ein erneuter Lauf.
 
+### Umsetzung einer Gestaltungsvorlage
+Das Erscheinungsbild wurde in zwei Durchgängen überarbeitet. Der zweite folgte einer schriftlichen
+Vorlage, die Farbwerte, Schriften, Radien und die gewünschte Wirkung je Seite benannte, ohne Code
+vorzugeben. Diese Arbeitsteilung erwies sich als die produktivste des gesamten Projekts: Die
+Entscheidung, *wie* die Anwendung aussehen soll, blieb beim Menschen; das Übersetzen in rund
+zwanzig Dateien übernahm das Werkzeug. Eine Vorlage in Prosa ist dafür ein besseres Format als eine
+Sammlung von Einzelanweisungen, weil sie die Absicht mitliefert — an drei Stellen liess sich die
+Vorlage nicht wörtlich umsetzen, und nur weil die Absicht bekannt war, konnte sinnvoll abgewichen
+werden (Fälle 5 bis 7).
+
 ## Wo der Einsatz Fehler erzeugt hat
 
-Diese vier Fälle sind ausdrücklich festgehalten, weil sie das Muster zeigen, nach dem die Fehler
-auftraten.
+Diese sieben Fälle sind ausdrücklich festgehalten, weil sie das Muster zeigen, nach dem die Fehler
+auftraten. Die Fälle 1 bis 4 stammen aus der Erstentwicklung, die Fälle 5 bis 7 aus der
+Überarbeitung des Erscheinungsbildes.
 
 ### 1. Veralteter Kenntnisstand zu Bibliotheken
 Der erzeugte Frontend-Code verwendete die MUI-Schreibweise älterer Hauptversionen
@@ -89,13 +100,51 @@ Aufgefallen ist es erst beim Betrachten eines Screenshots.
 **Erkenntnis:** Was fachlich funktioniert, muss nicht angemessen sein. Diese Art Fehler findet keine
 Testsuite, sondern nur das Anschauen des Ergebnisses.
 
+### 5. Vorlage wörtlich genommen statt Absicht verstanden
+Die Gestaltungsvorlage schrieb für die Primäraktion einen Farbwechsel über den
+Stil-Schlüssel `containedPrimary` vor. Diesen Schlüssel kennt die eingesetzte
+Bibliotheksversion nicht mehr — die Umsetzung erzeugte ihn dennoch, weil er in älteren Versionen
+üblich war. Der Übersetzer meldete den Fehler sofort.
+
+Schwerwiegender war die Folgekorrektur: Der Ersatzausdruck traf zunächst *jeden* Knopf dieser Art,
+auch den deaktivierten. Der Anmelde-Knopf sah damit voll eingefärbt und anklickbar aus, obwohl er
+gesperrt war. Kein Test schlug an, denn funktional war alles richtig.
+
+**Erkenntnis:** Derselbe Fehlertyp wie Fall 1, nur eine Ebene höher — diesmal traf ihn nicht der
+erzeugte Code, sondern die Vorlage selbst. Auch eine menschliche Vorgabe kann auf einem veralteten
+Kenntnisstand beruhen; sie ungeprüft zu übernehmen ist derselbe Fehler wie einem Werkzeug ungeprüft
+zu vertrauen.
+
+### 6. Anweisung befolgt, Ergebnis nicht betrachtet
+Die Vorlage verlangte den Prozentwert eines Projekts prominent rechts oben auf der Karte. Das wurde
+umgesetzt — nur stand er anschließend **zweimal** auf jeder Karte, weil der bestehende
+Fortschrittsbalken ihn ohnehin schon anzeigte. Dasselbe galt für die Aufgabenzahl.
+
+**Erkenntnis:** Jede Einzelanweisung war korrekt ausgeführt, das Gesamtergebnis trotzdem falsch.
+Aufgefallen ist es erst beim Betrachten des Screenshots, nicht beim Lesen des Codes. Wer eine
+Vorlage abarbeitet, prüft leicht nur, ob jeder Punkt erledigt ist — nicht, ob das Ganze noch stimmt.
+
+### 7. Werkzeugartefakt in der Dokumentation
+Auf einem der neu erzeugten Screenshots hing ein Tooltip offen, weil der Mauszeiger des
+Aufnahmeskripts über einem Element stehen geblieben war. Ein Detail — aber es wäre so in die
+Abgabe gewandert. Behoben durch eine Zeile im Aufnahmeskript, die den Zeiger vor jedem Bild
+zurücksetzt.
+
+**Erkenntnis:** Automatisch erzeugte Artefakte sind reproduzierbar, aber nicht automatisch richtig.
+Auch sie brauchen eine Sichtprüfung.
+
 ## Gesamteinschätzung
 
 Das erkennbare Muster: Das Werkzeug war stark bei **klar umrissenen, in sich geschlossenen
 Aufgaben** — ein Muster über viele Dateien wiederholen, eine Datenstruktur ableiten, Randfälle zu
-einer Rechenregel benennen. Es war schwach, sobald **Wissen über Systemgrenzen hinweg** nötig war
-(Fall 3), sobald **aktuelle Versionsstände** eine Rolle spielten (Fall 1) oder sobald es um
-**Angemessenheit statt Korrektheit** ging (Fall 4).
+einer Rechenregel benennen, eine Gestaltungsvorlage in zwanzig Dateien übersetzen. Es war schwach,
+sobald **Wissen über Systemgrenzen hinweg** nötig war (Fall 3), sobald **aktuelle Versionsstände**
+eine Rolle spielten (Fälle 1 und 5) und immer dann, wenn nicht die einzelne Anweisung, sondern das
+**Gesamtergebnis** zu beurteilen war (Fälle 4, 6 und 7).
+
+Der letzte Punkt ist der wichtigste: Die Fälle 4, 6 und 7 haben gemeinsam, dass jede Einzelvorgabe
+korrekt erfüllt war und das Ergebnis trotzdem nicht taugte. Genau diese Klasse von Fehlern findet
+keine Testsuite — sie fällt nur auf, wenn man sich das fertige Bild ansieht.
 
 Drei Dinge haben sich als praktisch wirksam erwiesen:
 
@@ -105,12 +154,16 @@ Drei Dinge haben sich als praktisch wirksam erwiesen:
    30 grüne Tests nicht bemerkt hatten.
 3. **Entscheidungen im Moment festhalten.** Die ADRs entstanden während der Umsetzung. Rückblickend
    erscheint jede Entscheidung alternativlos, weil die verworfenen Wege nicht mehr präsent sind.
+4. **Absicht statt Anweisungsliste übergeben.** Die Gestaltungsvorlage nannte nicht nur Farbwerte,
+   sondern auch, was sie bewirken sollen. Nur deshalb liessen sich die drei Stellen, an denen sie
+   technisch nicht umsetzbar war, sinnvoll auflösen statt blind zu übernehmen.
 
 **Bewertung der Arbeitsteilung:** Die Verantwortung für das Ergebnis lässt sich nicht delegieren.
 Das Werkzeug beschleunigt die Umsetzung erheblich, trifft aber keine Entscheidungen — und wo es
 welche zu treffen scheint, sind es Voreinstellungen aus seinen Trainingsdaten, nicht Abwägungen für
-den vorliegenden Fall. Die vier dokumentierten Fehler wären ohne Prüfung sämtlich in der Abgabe
-gelandet; drei davon hätten funktionierende, aber falsche Software ergeben.
+den vorliegenden Fall. Die sieben dokumentierten Fehler wären ohne Prüfung sämtlich in der Abgabe
+gelandet; fünf davon hätten funktionierende, aber falsche Software ergeben, und nur zwei hätte ein
+automatischer Lauf überhaupt bemerkt.
 
 ## Protokoll der Arbeitsschritte
 
@@ -124,3 +177,30 @@ gelandet; drei davon hätten funktionierende, aber falsche Software ergeben.
 | Tests | 30 Backend-, 14 Frontend-Tests | falsche Sitzungsannahme im Test (Fall 2) |
 | Oberflächentext | deutschsprachige Meldungen | Umlaute in Nutzermeldungen (Fall 4) |
 | Diagramme | PlantUML-Quellen für UML und ER | Layout zweimal überarbeitet (Überlappungen) |
+| Erscheinungsbild, 1. Runde | Farbschema, Statusampel, Rundungen | Ampelfarbe für "offen" bewusst grau statt rot |
+| Erscheinungsbild, 2. Runde | Vorlage in rund 20 Dateien übersetzt | veralteter Stil-Schlüssel, deaktivierter Knopf, doppelter Prozentwert (Fälle 5–7) |
+| Veröffentlichung | Repository angelegt, Historie bereinigt | E-Mail-Adresse in drei Commits (siehe unten) |
+
+## Ein Vorfall bei der Veröffentlichung
+
+Das Repository wurde gegen Ende mit Werkzeugunterstützung auf GitHub veröffentlicht. Dabei traten
+zwei Dinge auf, die für die Bewertung des Werkzeugeinsatzes aufschlussreicher sind als jeder
+Codefehler.
+
+**Erstens** trugen alle Commits zunächst den technischen Benutzernamen der Entwicklungsumgebung
+statt einer Person. Das fiel nur auf, weil danach gezielt geprüft wurde. Für eine Arbeit, deren
+Versionsgeschichte den Entwicklungsprozess belegen soll, wäre das ein stiller Substanzverlust
+gewesen — die Historie hätte formal existiert, aber niemandem zugeordnet werden können.
+
+**Zweitens** entstanden drei Commits aus einer zweiten, parallel laufenden Werkzeugsitzung. Sie
+trugen die private E-Mail-Adresse statt der zuvor bewusst gewählten, anonymisierten Adresse und
+waren bereits veröffentlicht, bevor das bemerkt wurde. Die Prüfung, ob die Adresse öffentlich sei,
+war zunächst gegen den falschen Zweig gelaufen und hatte fälschlich Entwarnung gegeben; erst eine
+zweite Prüfung gegen den tatsächlichen Zielzweig deckte es auf. Die Historie liess sich bereinigen,
+die alten Einträge bleiben bei GitHub jedoch noch eine Weile über ihre ursprüngliche Kennung
+erreichbar.
+
+**Erkenntnis:** Beide Punkte betreffen nicht die erzeugte Software, sondern ihre Umgebung —
+Autorenschaft, Nachvollziehbarkeit, Datensparsamkeit. Genau dort ist die Aufmerksamkeit am
+geringsten, weil es sich nicht wie Programmieren anfühlt. Und der zweite Punkt zeigt zusätzlich:
+Eine Prüfung, die das Falsche misst, ist gefährlicher als gar keine, weil sie Sicherheit vortäuscht.

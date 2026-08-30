@@ -15,3 +15,4 @@ gewichtet „Analyse" und „Ergebnis einschließlich kritischer Reflexion" mit 
 | [ADR-003](ADR-003-authentifizierung.md) | Sitzungsbasierte Anmeldung statt HTTP Basic oder JWT | angenommen |
 | [ADR-004](ADR-004-mandantenfaehigkeit.md) | Mandantentrennung über `tenant_id` und Anwendungslogik | angenommen |
 | [ADR-005](ADR-005-fortschritt-berechnen.md) | Projektfortschritt berechnen statt speichern | angenommen |
+| [ADR-006](ADR-006-statuskodierung.md) | Aufgabenstatus über Farbe **und** Symbol kodieren | angenommen |

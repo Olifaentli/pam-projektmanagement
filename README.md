@@ -27,7 +27,7 @@ Der Stack folgt dem Kursskript; Ergänzungen sind in den [ADRs](docs/adr/) begr�
 
 **Backend** — Java 21 · Spring Boot 3.3 · Spring MVC · Spring Data JPA/Hibernate ·
 Spring Security · Bean Validation · Flyway · Maven
-**Frontend** — React 19 · TypeScript · Vite · MUI · React Router
+**Frontend** — React 19 · TypeScript · Vite · MUI · React Router · IBM Plex Sans / Space Grotesk
 **Datenbank** — PostgreSQL 16 (Betrieb) · H2 (Tests)
 **Tests** — JUnit 5 · Mockito · MockMvc · Vitest · React Testing Library
 
@@ -40,6 +40,12 @@ Geschäftslogik, Repositories kapseln den Datenzugriff. Entitäten verlassen die
 Die Anwendung ist **mandantenfähig vorbereitet**: Jede fachliche Tabelle trägt eine `tenant_id`,
 jede Abfrage ist mandantengebunden, und die Mandanten-ID stammt ausschließlich aus dem
 authentifizierten Principal. Details in [ADR-004](docs/adr/ADR-004-mandantenfaehigkeit.md).
+
+Das Erscheinungsbild folgt der Richtung „Kontrast, gedämpft": eine dunkle Navigationsschiene als
+einziger großflächig dunkler Bereich, alle Inhaltsflächen hell, starker Kontrast bewusst sparsam —
+für Kennzahlen, den aktiven Navigationseintrag und die Primäraktion. Die Aufgabenstatus sind
+doppelt kodiert, über Farbe **und** Symbol; die Begründung steht in
+[ADR-006](docs/adr/ADR-006-statuskodierung.md).
 
 Diagramme: [Klassendiagramm](docs/uml/klassendiagramm.png) ·
 [Komponentendiagramm](docs/uml/komponentendiagramm.png) ·

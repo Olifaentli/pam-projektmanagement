@@ -19,6 +19,23 @@ sichergestellt wurde und wie KI-Werkzeuge eingesetzt wurden.
 | Einsatz von KI-Werkzeugen | [`ki-einsatz.md`](ki-einsatz.md) |
 | Begründung der Entscheidungen | [`adr/`](adr/) — fünf Architecture Decision Records |
 
+## Zum Verhältnis von Entwurf und Umsetzung
+
+Die Wireframes zeigen den Stand **vor** der Implementierung und wurden bewusst **nicht**
+nachträglich an das fertige Erscheinungsbild angeglichen. Ein Entwurf, der exakt dem Ergebnis
+entspricht, ist kein Entwurf mehr, sondern eine nachgezeichnete Umsetzung — und die Aufgabenstellung
+verlangt ausdrücklich beides nebeneinander.
+
+Die Abweichungen sind damit selbst ein Ergebnis und gehören in den Textteil. Die wesentlichen:
+
+| Entwurf | Umsetzung | Grund |
+|---|---|---|
+| helle Seitennavigation, Nutzer in der Kopfleiste | dunkle Navigationsschiene, Nutzer an deren Fuß | ein einziger dunkler Bereich gibt der Seite Halt; die Kopfleiste wird dadurch frei |
+| Fortschritt und Team in zwei Karten | eine gemeinsame Karte, Team als Initialen | beides beschreibt denselben Gegenstand und war unnötig auf zwei Flächen verteilt |
+| Aufgabenkarte mit farbigem Balken links | feiner Rahmen in der Spaltenfarbe | die Spaltenfläche kodiert den Status bereits; der Balken doppelte ihn |
+| Fälligkeit im Fließtext der Karte | eigenes Datums-Chip rechts unten | Termin ist die am häufigsten gesuchte Angabe und braucht einen festen Platz |
+| Projektliste ohne Prozentwert im Kopf | Prozentwert rechts oben neben dem Namen | schnellster Anker beim Überfliegen einer Liste |
+
 ## Artefakte neu erzeugen
 
 Alle Artefakte sind reproduzierbar. Ändert sich die Anwendung, genügt ein erneuter Lauf.
