@@ -1,10 +1,10 @@
-import { Alert, Box, Card, CardContent, Grid, Skeleton, Typography } from '@mui/material'
+import { Alert, Box, Card, CardContent, Chip, Grid, Skeleton, Stack, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { projectApi } from '../api/endpoints'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useAuth } from '../auth/AuthContext'
 import { ProgressBar } from '../components/ProgressBar'
-import { STATUS_COLORS } from '../theme'
+import { STATUS_ACCENT, STATUS_COLORS } from '../theme'
 import type { Project } from '../api/types'
 
 /** Einstiegsseite mit Kennzahlen ueber die sichtbaren Projekte. */
@@ -28,28 +28,48 @@ export function DashboardPage() {
 
   // Die Kennzahlen greifen dieselben Ampelfarben auf wie die Aufgabenstatus,
   // damit Farbe in der gesamten Anwendung dasselbe bedeutet.
+  // Der Randstreifen nimmt die weichere Flaechenfarbe, die Zahl den
+  // kraeftigeren Akzent - dieselbe Trennung wie im Fortschrittsbalken.
   const tiles = [
-    { label: 'Aktive Projekte', value: active.length, color: '#123A5F' },
-    { label: 'Archivierte Projekte', value: projects.length - active.length, color: STATUS_COLORS.OPEN.main },
-    { label: 'Offene Aufgaben', value: openTasks, color: STATUS_COLORS.IN_PROGRESS.main },
-    { label: 'Erledigte Aufgaben', value: doneTasks, color: STATUS_COLORS.DONE.main },
+    { label: 'Aktive Projekte', value: active.length, line: '#2E4A66', accent: '#2E4A66' },
+    {
+      label: 'Archivierte Projekte',
+      value: projects.length - active.length,
+      line: STATUS_COLORS.OPEN.main,
+      accent: STATUS_ACCENT.OPEN,
+    },
+    {
+      label: 'Offene Aufgaben',
+      value: openTasks,
+      line: STATUS_COLORS.IN_PROGRESS.main,
+      accent: STATUS_ACCENT.IN_PROGRESS,
+    },
+    {
+      label: 'Erledigte Aufgaben',
+      value: doneTasks,
+      line: STATUS_COLORS.DONE.main,
+      accent: STATUS_ACCENT.DONE,
+    },
   ]
 
   return (
     <Box>
+      <Typography variant="overline" color="text.secondary">
+        Übersicht
+      </Typography>
       <Typography variant="h1" gutterBottom>
         Willkommen, {user?.fullName}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Übersicht über die Projekte, für die Sie berechtigt sind.
+        {active.length} aktive Projekte · {openTasks} offene Aufgaben in Ihrer Verantwortung
       </Typography>
 
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {tiles.map((tile) => (
           <Grid key={tile.label} size={{ xs: 6, md: 3 }}>
-            <Card sx={{ borderTop: `3px solid ${tile.color}` }}>
+            <Card sx={{ borderTop: `3px solid ${tile.line}` }}>
               <CardContent>
-                <Typography variant="h4" sx={{ fontWeight: 700, color: tile.color }}>
+                <Typography variant="h4" sx={{ color: tile.accent }}>
                   {tile.value}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -61,9 +81,14 @@ export function DashboardPage() {
         ))}
       </Grid>
 
-      <Typography variant="h2" gutterBottom>
-        Aktive Projekte
-      </Typography>
+      <Stack direction="row" spacing={1.2} sx={{ alignItems: 'center', mb: 1.5 }}>
+        <Typography variant="h2">Aktive Projekte</Typography>
+        <Chip
+          size="small"
+          label={active.length}
+          sx={{ bgcolor: '#E7F2F0', color: 'secondary.main', borderRadius: 999 }}
+        />
+      </Stack>
       {active.length === 0 ? (
         <Alert severity="info">Ihnen ist derzeit kein aktives Projekt zugeordnet.</Alert>
       ) : (

@@ -46,30 +46,27 @@ export function AppLayout() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
+      {/* Die Kopfleiste ist hell und flach; die Orientierung uebernimmt die
+          dunkle Seitenleiste. Sie liegt deshalb NICHT mehr ueber dem Drawer. */}
+      <AppBar
+        position="fixed"
+        color="inherit"
+        sx={{ width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, ml: { md: `${DRAWER_WIDTH}px` } }}
+      >
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, color: 'text.primary', fontWeight: 600 }}
+          >
             Projekt- und Aufgabenmanagement
           </Typography>
           {user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', fontSize: 14 }}>
-                {user.fullName
-                  .split(' ')
-                  .map((part) => part[0])
-                  .join('')
-                  .slice(0, 2)}
-              </Avatar>
-              <Box sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'right' }}>
-                <Typography variant="body2">{user.fullName}</Typography>
-                <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                  {user.roles.map((r) => ROLE_LABELS[r]).join(', ')}
-                </Typography>
-              </Box>
-              <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>
-                Abmelden
-              </Button>
-            </Box>
+            // color="primary" statt "inherit": auf weissem Grund waere der
+            // Knopf sonst unsichtbar.
+            <Button color="primary" startIcon={<LogoutIcon />} onClick={handleLogout}>
+              Abmelden
+            </Button>
           )}
         </Toolbar>
       </AppBar>
@@ -83,7 +80,35 @@ export function AppLayout() {
           '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
         }}
       >
-        <Toolbar />
+        {/* Markenblock ersetzt den bisherigen leeren Toolbar-Abstand. */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.4, px: 2.5, height: 64 }}>
+          <Box
+            sx={{
+              width: 28,
+              height: 28,
+              borderRadius: '8px',
+              bgcolor: 'secondary.main',
+              color: '#fff',
+              display: 'grid',
+              placeItems: 'center',
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontWeight: 700,
+              fontSize: 14,
+            }}
+          >
+            p
+          </Box>
+          <Typography
+            sx={{
+              color: '#fff',
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontWeight: 600,
+              fontSize: 16,
+            }}
+          >
+            pam
+          </Typography>
+        </Box>
         <Box sx={{ overflow: 'auto' }}>
           <List component="nav" aria-label="Hauptnavigation">
             {navItems.map((item) => (
@@ -104,7 +129,7 @@ export function AppLayout() {
             ))}
             {/* Der Administrationsbereich erscheint nur fuer die Rolle ADMIN. */}
             <RoleGate roles={['ADMIN']}>
-              <Divider sx={{ my: 1 }} />
+              <Divider sx={{ my: 1, borderColor: 'rgba(255,255,255,.14)' }} />
               <ListItemButton
                 selected={location.pathname === '/admin/users'}
                 onClick={() => navigate('/admin/users')}
@@ -117,6 +142,37 @@ export function AppLayout() {
             </RoleGate>
           </List>
         </Box>
+
+        {/* Der angemeldete Benutzer steht am Fuss der Navigationsschiene. */}
+        {user && (
+          <Box
+            sx={{
+              mt: 'auto',
+              px: 2.5,
+              py: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.4,
+              borderTop: '1px solid rgba(255,255,255,.14)',
+            }}
+          >
+            <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', fontSize: 13 }}>
+              {user.fullName
+                .split(' ')
+                .map((part) => part[0])
+                .join('')
+                .slice(0, 2)}
+            </Avatar>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600 }} noWrap>
+                {user.fullName}
+              </Typography>
+              <Typography sx={{ color: '#9FB3C8', fontSize: 11 }} noWrap>
+                {user.roles.map((r) => ROLE_LABELS[r]).join(', ')}
+              </Typography>
+            </Box>
+          </Box>
+        )}
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, width: '100%' }}>

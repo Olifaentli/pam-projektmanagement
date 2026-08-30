@@ -27,7 +27,15 @@ import { ApiError } from '../api/client'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useAuth } from '../auth/AuthContext'
 import { ProgressBar } from '../components/ProgressBar'
-import type { Project, ProjectStatusName } from '../api/types'
+import { STATUS_ACCENT } from '../theme'
+import type { Progress, Project, ProjectStatusName } from '../api/types'
+
+/** Ordnet einen Fortschritt der Ampelstufe zu, deren Akzentfarbe er traegt. */
+function progressStatus(p: Progress): 'OPEN' | 'IN_PROGRESS' | 'DONE' {
+  if (p.total === 0 || p.percentDone === 0) return 'OPEN'
+  if (p.percentDone >= 100) return 'DONE'
+  return 'IN_PROGRESS'
+}
 
 /** Projektübersicht mit Filter und Anlage-Dialog (US-2, US-6, US-8). */
 export function ProjectListPage() {
@@ -82,25 +90,43 @@ export function ProjectListPage() {
                 onClick={() => navigate(`/projects/${project.id}`)}
               >
                 <CardContent>
-                  <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <Typography variant="h6" gutterBottom>
-                      {project.name}
-                    </Typography>
-                    {project.status === 'ARCHIVED' && (
-                      <Chip size="small" label="Archiviert" variant="outlined" />
-                    )}
-                  </Stack>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 2, minHeight: 40 }}
+                  {/* Der Prozentwert steht rechts oben: in einer Liste ist er
+                      der schnellste Anker beim Überfliegen. */}
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}
                   >
+                    <Typography variant="h6">{project.name}</Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontFamily: '"Space Grotesk", sans-serif',
+                        color: STATUS_ACCENT[progressStatus(project.progress)],
+                        flexShrink: 0,
+                      }}
+                    >
+                      {project.progress.percentDone} %
+                    </Typography>
+                  </Stack>
+                  {project.status === 'ARCHIVED' && (
+                    <Chip size="small" label="Archiviert" variant="outlined" sx={{ mb: 1 }} />
+                  )}
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {project.description ?? 'Keine Beschreibung hinterlegt.'}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-                    {project.memberCount} Mitarbeitende
-                  </Typography>
-                  <ProgressBar progress={project.progress} />
+                  {/* Prozentwert steht bereits oben rechts, die Zahlen stehen
+                      in der Fußzeile - der Balken bleibt hier ohne Beschriftung. */}
+                  <ProgressBar progress={project.progress} showHeader={false} showCaption={false} />
+                  <Stack
+                    direction="row"
+                    sx={{ justifyContent: 'space-between', mt: 1, fontSize: 12, color: '#8A94A2' }}
+                  >
+                    <span>
+                      {project.progress.done}/{project.progress.total} Aufgaben
+                    </span>
+                    <span>{project.memberCount} Mitarbeitende</span>
+                  </Stack>
                 </CardContent>
               </CardActionArea>
             </Card>

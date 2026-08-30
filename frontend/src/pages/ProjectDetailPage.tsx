@@ -15,6 +15,7 @@ import {
   Divider,
   Grid,
   IconButton,
+  LinearProgress,
   List,
   ListItem,
   ListItemButton,
@@ -25,6 +26,7 @@ import {
   Skeleton,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
@@ -37,12 +39,18 @@ import { directoryApi, projectApi, taskApi } from '../api/endpoints'
 import { ApiError } from '../api/client'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useAuth } from '../auth/AuthContext'
-import { ProgressBar } from '../components/ProgressBar'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { StatusDot } from '../components/StatusIndicator'
-import { STATUS_COLORS } from '../theme'
+import { STATUS_ACCENT, STATUS_COLORS } from '../theme'
 import { TASK_STATUSES } from '../api/types'
-import type { Member, Project, Task, TaskStatusName } from '../api/types'
+import type { Member, Progress, Project, Task, TaskStatusName } from '../api/types'
+
+/** Ordnet einen Fortschritt der Ampelstufe zu, deren Farbe er traegt. */
+function progressStatus(p: Progress): 'OPEN' | 'IN_PROGRESS' | 'DONE' {
+  if (p.total === 0 || p.percentDone === 0) return 'OPEN'
+  if (p.percentDone >= 100) return 'DONE'
+  return 'IN_PROGRESS'
+}
 
 /**
  * Projektdetail mit Aufgabenboard (US-4, US-5), Fortschritt (US-6) und
@@ -116,13 +124,21 @@ export function ProjectDetailPage() {
 
   return (
     <Box>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/projects')} sx={{ mb: 2 }}>
-        Zurück zur Projektliste
-      </Button>
+      <Typography sx={{ fontSize: 12, color: '#8496A9', mb: 0.5 }}>
+        Projekte / {p.name}
+      </Typography>
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ justifyContent: "space-between", mb: 3 }}>
         <Box>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <IconButton
+              size="small"
+              aria-label="Zurück zur Projektliste"
+              onClick={() => navigate('/projects')}
+              sx={{ ml: -0.5 }}
+            >
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
             <Typography variant="h1">{p.name}</Typography>
             {archived && <Chip label="Archiviert" variant="outlined" />}
           </Stack>
@@ -160,35 +176,89 @@ export function ProjectDetailPage() {
         </Alert>
       )}
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Card>
-            <CardContent>
-              <ProgressBar progress={p.progress} />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="subtitle2" gutterBottom>
-                Zugeordnete Mitarbeitende ({members.data?.length ?? 0})
+      {/* Fortschritt und Team in einer Karte: beides beschreibt denselben
+          Gegenstand und wurde vorher unnoetig auf zwei Flaechen verteilt. */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={3}
+            divider={<Divider orientation="vertical" flexItem />}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'baseline', mb: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Fortschritt
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: '"Space Grotesk", sans-serif',
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: STATUS_ACCENT[progressStatus(p.progress)],
+                  }}
+                >
+                  {p.progress.percentDone} %
+                </Typography>
+              </Stack>
+              <LinearProgress
+                variant="determinate"
+                value={p.progress.percentDone}
+                sx={{
+                  height: 8,
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor: STATUS_COLORS[progressStatus(p.progress)].main,
+                  },
+                }}
+                aria-label={`Fortschritt ${p.progress.percentDone} Prozent, ${p.progress.done} von ${p.progress.total} Aufgaben erledigt`}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
+                {p.progress.done} von {p.progress.total} Aufgaben erledigt
+              </Typography>
+            </Box>
+
+            <Box sx={{ minWidth: 200 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Team ({members.data?.length ?? 0})
               </Typography>
               {(members.data ?? []).length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
                   Noch niemand zugeordnet.
                 </Typography>
               ) : (
-                <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.5 }}>
+                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
                   {(members.data ?? []).map((m) => (
-                    <Chip key={m.userId} size="small" label={m.fullName} />
+                    // Initialen sparen Platz; der volle Name bleibt als
+                    // Tooltip und als title-Attribut erreichbar.
+                    <Tooltip key={m.userId} title={m.fullName}>
+                      <Box
+                        title={m.fullName}
+                        sx={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: '9px',
+                          bgcolor: '#EAEFF5',
+                          color: '#3E5872',
+                          fontSize: 11,
+                          fontWeight: 600,
+                          display: 'grid',
+                          placeItems: 'center',
+                        }}
+                      >
+                        {m.fullName
+                          .split(' ')
+                          .map((part) => part[0])
+                          .join('')
+                          .slice(0, 2)}
+                      </Box>
+                    </Tooltip>
                   ))}
                 </Stack>
               )}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
 
       <Typography variant="h2" gutterBottom>
         Aufgaben
@@ -204,13 +274,15 @@ export function ProjectDetailPage() {
           const columnTasks = (tasks.data ?? []).filter((t) => t.status === column.value)
           return (
             <Grid key={column.value} size={{ xs: 12, md: 4 }}>
+              {/* Die Spaltenflaeche traegt die Statusfarbe. Ein zusaetzlicher
+                  Rahmen waere doppelte Kodierung und macht das Board unruhig. */}
               <Paper
-                variant="outlined"
+                elevation={0}
                 sx={{
                   p: 2,
                   height: '100%',
+                  border: 'none',
                   bgcolor: STATUS_COLORS[column.value].soft,
-                  borderColor: `${STATUS_COLORS[column.value].main}33`,
                 }}
               >
                 <Stack
@@ -220,21 +292,21 @@ export function ProjectDetailPage() {
                   <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                     <StatusDot status={column.value} size={11} />
                     <Typography
-                      variant="subtitle1"
-                      sx={{ fontWeight: 700, color: STATUS_COLORS[column.value].text }}
+                      sx={{ fontSize: 13, fontWeight: 700, color: STATUS_COLORS[column.value].text }}
                     >
                       {column.label}
                     </Typography>
                   </Stack>
-                  <Chip
-                    size="small"
-                    label={columnTasks.length}
+                  <Typography
                     sx={{
-                      bgcolor: '#fff',
-                      color: STATUS_COLORS[column.value].text,
-                      border: `1px solid ${STATUS_COLORS[column.value].main}33`,
+                      fontFamily: '"Space Grotesk", sans-serif',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: STATUS_ACCENT[column.value],
                     }}
-                  />
+                  >
+                    {columnTasks.length}
+                  </Typography>
                 </Stack>
                 <Stack spacing={1.5}>
                   {columnTasks.length === 0 && (
@@ -246,13 +318,24 @@ export function ProjectDetailPage() {
                     <Card
                       key={task.id}
                       sx={{
-                        borderLeft: `4px solid ${STATUS_COLORS[task.status].main}`,
                         bgcolor: '#fff',
+                        borderRadius: '11px',
+                        border: `1px solid ${STATUS_COLORS[column.value].line}`,
                       }}
                     >
                       <CardContent sx={{ pb: 1.5 }}>
                         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 500,
+                              ...(task.status === 'DONE' && {
+                                color: '#5E6D7E',
+                                textDecoration: 'line-through',
+                                textDecorationColor: '#C3CCD6',
+                              }),
+                            }}
+                          >
                             {task.title}
                           </Typography>
                           {!archived && (
@@ -265,14 +348,38 @@ export function ProjectDetailPage() {
                             </IconButton>
                           )}
                         </Stack>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                          {task.assigneeName ?? 'Nicht zugewiesen'}
-                          {task.dueDate && ` · fällig ${new Date(task.dueDate).toLocaleDateString('de-DE')}`}
-                        </Typography>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: 'center', justifyContent: 'space-between', mt: 0.25 }}
+                        >
+                          <Typography variant="caption" color="text.secondary" noWrap>
+                            {task.assigneeName ?? 'Nicht zugewiesen'}
+                          </Typography>
+                          {task.dueDate && (
+                            <Box
+                              sx={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: '#8A5A1C',
+                                bgcolor: '#F5E8D6',
+                                borderRadius: '6px',
+                                px: 0.75,
+                                py: 0.25,
+                                flexShrink: 0,
+                              }}
+                            >
+                              {new Date(task.dueDate).toLocaleDateString('de-DE', {
+                                day: '2-digit',
+                                month: '2-digit',
+                              })}
+                            </Box>
+                          )}
+                        </Stack>
                         <Select
                           size="small"
                           fullWidth
-                          sx={{ mt: 1 }}
+                          sx={{ mt: 1.5 }}
                           value={task.status}
                           disabled={archived}
                           onChange={(e) => changeStatus(task, e.target.value as TaskStatusName)}
