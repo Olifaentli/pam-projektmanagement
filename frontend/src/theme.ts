@@ -108,7 +108,9 @@ export const theme = createTheme({
         // MUI 9 kennt den frueheren Schluessel "containedPrimary" nicht mehr,
         // deshalb ueber die Variantenliste statt ueber styleOverrides.
         contained: {
-          '&.MuiButton-colorPrimary': {
+          // :not(.Mui-disabled) ist noetig, sonst wirkt ein deaktivierter
+          // Knopf voll eingefaerbt und damit faelschlich anklickbar.
+          '&.MuiButton-colorPrimary:not(.Mui-disabled)': {
             backgroundColor: PETROL.main,
             '&:hover': { backgroundColor: PETROL.dark },
           },
