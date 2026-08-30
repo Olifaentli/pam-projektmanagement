@@ -4,76 +4,116 @@ import type { TaskStatusName } from './api/types'
 /**
  * Gemeinsames Design der Anwendung.
  *
- * Ein zentrales Theme ist der Kern des Arguments fuer eine
- * Komponentenbibliothek (Lektion 6.1): Farben, Abstaende, Rundungen und
- * Typografie werden einmal festgelegt und gelten fuer jede Komponente.
- * Eine Aenderung hier wirkt sofort auf die gesamte Oberflaeche.
+ * Richtung "Kontrast, gedaempft": eine farbige, dunkle Navigationsschiene als
+ * einziger grossflaechig dunkler Bereich; alle Inhaltsflaechen bleiben hell.
+ * Starker Kontrast wird bewusst sparsam eingesetzt - fuer Kennzahlen, den
+ * aktiven Navigationseintrag und die Primaeraktion.
  */
 
-/** Dunkles Marineblau als Leitfarbe, Petrol als Akzent. */
-const NAVY = {
-  main: '#123A5F',
-  light: '#2E5D87',
-  dark: '#0A2440',
+/** Schieferblau als Leitfarbe, Petrol als Akzent. */
+const SLATE = {
+  main: '#2E4A66',
+  light: '#456A8A',
+  dark: '#1E3247',
   contrastText: '#FFFFFF',
 }
 
 const PETROL = {
-  main: '#0E8074',
-  light: '#3AA79B',
-  dark: '#065F55',
+  main: '#157F73',
+  light: '#3FA598',
+  dark: '#0C5F56',
   contrastText: '#FFFFFF',
 }
 
 /**
  * Ampelfarben der Aufgabenstatus (US-5).
  *
- * An genau einer Stelle definiert, damit dieselbe Farbe ueberall dieselbe
- * Bedeutung hat - in der Statusanzeige, im Auswahlfeld und in den
- * Spaltenkoepfen des Aufgabenboards.
+ * Gegenueber der Vorversion leicht entsaettigt, damit drei Statusspalten
+ * nebeneinander nicht flimmern. Die Bedeutung bleibt unveraendert:
+ * "Offen" neutral grau, "In Bearbeitung" warm, "Erledigt" gruen.
  *
- * "Offen" ist bewusst grau und nicht rot: Rot signalisiert einen Fehler oder
- * eine Ueberschreitung. Eine noch nicht begonnene Aufgabe ist aber weder das
- * eine noch das andere - sie ist schlicht neutral.
+ * main = Punkt/Balken, soft = Spaltenhintergrund, text = Beschriftung,
+ * line  = Rahmen von Karten innerhalb der Spalte.
  */
-export const STATUS_COLORS: Record<TaskStatusName, { main: string; soft: string; text: string }> = {
-  OPEN: { main: '#64748B', soft: '#EEF1F5', text: '#3E4A5A' },
-  IN_PROGRESS: { main: '#D97706', soft: '#FEF3E2', text: '#96540A' },
-  DONE: { main: '#15803D', soft: '#E9F6EE', text: '#116330' },
+export const STATUS_COLORS: Record<
+  TaskStatusName,
+  { main: string; soft: string; text: string; line: string }
+> = {
+  OPEN: { main: '#94A3B3', soft: '#EEF1F5', text: '#4A5563', line: '#E6EAEF' },
+  IN_PROGRESS: { main: '#C98A3C', soft: '#FAF3E9', text: '#8A5A1C', line: '#EFE3D2' },
+  DONE: { main: '#4E9B6C', soft: '#EDF4EF', text: '#256540', line: '#DEEAE1' },
+}
+
+/** Kraeftigere Variante derselben Farben - nur fuer Zahlen und Prozentwerte. */
+export const STATUS_ACCENT: Record<TaskStatusName, string> = {
+  OPEN: '#7A8797',
+  IN_PROGRESS: '#B4691A',
+  DONE: '#2C7A4B',
 }
 
 export const theme = createTheme({
   palette: {
-    primary: NAVY,
+    primary: SLATE,
     secondary: PETROL,
-    background: { default: '#F1F4F8', paper: '#FFFFFF' },
-    text: { primary: '#1A2330', secondary: '#5A6675' },
-    divider: '#E2E7EE',
+    background: { default: '#F5F7F9', paper: '#FFFFFF' },
+    text: { primary: '#1E3247', secondary: '#5E6D7E' },
+    divider: '#E3E8EE',
   },
 
   typography: {
-    fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    h1: { fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.02em' },
-    h2: { fontSize: '1.3rem', fontWeight: 600, letterSpacing: '-0.01em' },
-    h6: { fontWeight: 600 },
+    fontFamily: '"IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    // Space Grotesk traegt Ueberschriften und Zahlen: enger, technischer,
+    // deutlich unterscheidbar von der Fliesstext-Schrift.
+    h1: {
+      fontFamily: '"Space Grotesk", "IBM Plex Sans", sans-serif',
+      fontSize: '2rem',
+      fontWeight: 700,
+      letterSpacing: '-0.03em',
+      lineHeight: 1.15,
+    },
+    h2: {
+      fontFamily: '"Space Grotesk", "IBM Plex Sans", sans-serif',
+      fontSize: '1.25rem',
+      fontWeight: 600,
+      letterSpacing: '-0.02em',
+    },
+    h4: {
+      fontFamily: '"Space Grotesk", "IBM Plex Sans", sans-serif',
+      fontWeight: 700,
+      letterSpacing: '-0.04em',
+      // Ziffern gleicher Breite: Kennzahlen springen beim Aktualisieren nicht.
+      fontVariantNumeric: 'tabular-nums',
+    },
+    h6: { fontWeight: 600, letterSpacing: '-0.01em' },
     subtitle1: { fontWeight: 600 },
     button: { fontWeight: 600 },
+    overline: { fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', lineHeight: 1.6 },
   },
 
-  // Grosszuegige Rundung als durchgaengiges Gestaltungsmerkmal.
   shape: { borderRadius: 14 },
 
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: { backgroundColor: '#F5F7F9' },
+      },
+    },
+
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: {
-          // Grossbuchstaben wirken heute altmodisch und erschweren das Lesen
-          // langer Beschriftungen wie "Zurück zur Projektliste".
-          textTransform: 'none',
-          borderRadius: 10,
-          paddingInline: 18,
+        root: { textTransform: 'none', borderRadius: 10, paddingInline: 18 },
+        // Primaeraktion in Petrol statt in der Leitfarbe: sie soll sich von
+        // der Navigationsschiene absetzen, nicht mit ihr verschmelzen.
+        // MUI 9 kennt den frueheren Schluessel "containedPrimary" nicht mehr,
+        // deshalb ueber die Variantenliste statt ueber styleOverrides.
+        contained: {
+          '&.MuiButton-colorPrimary': {
+            backgroundColor: PETROL.main,
+            '&:hover': { backgroundColor: PETROL.dark },
+          },
         },
+        outlined: { borderColor: '#DCE3EB', backgroundColor: '#FFFFFF', color: SLATE.main },
       },
     },
 
@@ -81,73 +121,95 @@ export const theme = createTheme({
       defaultProps: { variant: 'outlined' },
       styleOverrides: {
         root: {
-          borderColor: '#E2E7EE',
+          borderColor: '#E3E8EE',
           transition: 'border-color .18s ease, box-shadow .18s ease',
           '&:hover': {
-            borderColor: '#C9D3E0',
-            boxShadow: '0 6px 20px rgba(18, 58, 95, .07)',
+            borderColor: '#CBD5E1',
+            boxShadow: '0 6px 18px rgba(24, 42, 63, .07)',
           },
         },
       },
     },
 
     MuiPaper: {
-      styleOverrides: {
-        outlined: { borderColor: '#E2E7EE' },
-      },
+      styleOverrides: { outlined: { borderColor: '#E3E8EE' } },
     },
 
+    // Kopfleiste flach und hell - die Orientierung uebernimmt die Seitenleiste.
     MuiAppBar: {
+      defaultProps: { elevation: 0, color: 'inherit' },
       styleOverrides: {
         root: {
-          backgroundImage: `linear-gradient(90deg, ${NAVY.dark} 0%, ${NAVY.main} 55%, #164B78 100%)`,
-          boxShadow: '0 1px 0 rgba(255,255,255,.08)',
+          backgroundColor: '#FFFFFF',
+          color: '#1E3247',
+          borderBottom: '1px solid #E3E8EE',
+          backgroundImage: 'none',
         },
       },
     },
 
+    // Dunkle Navigationsschiene: der einzige grossflaechig dunkle Bereich.
     MuiDrawer: {
       styleOverrides: {
-        paper: { borderRight: '1px solid #E2E7EE', backgroundColor: '#FFFFFF' },
+        paper: { backgroundColor: SLATE.main, borderRight: 'none', color: '#FFFFFF' },
       },
     },
 
-    // Aktiver Navigationseintrag erhaelt eine deutliche, aber ruhige Markierung.
     MuiListItemButton: {
       styleOverrides: {
         root: {
           borderRadius: 10,
           marginInline: 8,
+          color: '#C2D2E1',
+          '& .MuiListItemIcon-root': { color: '#7E99B3', minWidth: 34 },
+          '& .MuiListItemText-primary': { fontSize: 14, fontWeight: 500 },
+          '&:hover': { backgroundColor: 'rgba(255,255,255,.07)' },
           '&.Mui-selected': {
-            backgroundColor: 'rgba(18, 58, 95, .09)',
-            '&:hover': { backgroundColor: 'rgba(18, 58, 95, .13)' },
-            '& .MuiListItemIcon-root': { color: NAVY.main },
+            backgroundColor: 'rgba(255,255,255,.14)',
+            color: '#FFFFFF',
+            '&:hover': { backgroundColor: 'rgba(255,255,255,.18)' },
+            '& .MuiListItemIcon-root': { color: '#7FD3C6' },
+            '& .MuiListItemText-primary': { fontWeight: 600 },
           },
         },
       },
     },
 
     MuiChip: {
-      styleOverrides: {
-        root: { borderRadius: 8, fontWeight: 600 },
-      },
+      styleOverrides: { root: { borderRadius: 8, fontWeight: 600 } },
     },
 
     MuiToggleButton: {
       styleOverrides: {
-        root: { textTransform: 'none', borderRadius: 10, paddingInline: 16 },
+        root: {
+          textTransform: 'none',
+          borderRadius: 10,
+          paddingInline: 16,
+          borderColor: '#DCE3EB',
+          '&.Mui-selected': {
+            backgroundColor: '#FFFFFF',
+            color: SLATE.main,
+            borderColor: '#B9C6D4',
+          },
+        },
       },
     },
 
     MuiTextField: { defaultProps: { size: 'small' } },
 
     MuiOutlinedInput: {
-      styleOverrides: { root: { borderRadius: 10 } },
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          backgroundColor: '#FFFFFF',
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: '#DCE3EB' },
+        },
+      },
     },
 
     MuiLinearProgress: {
       styleOverrides: {
-        root: { borderRadius: 999, backgroundColor: '#E4E9F0' },
+        root: { borderRadius: 999, backgroundColor: '#EDF0F4' },
         bar: { borderRadius: 999 },
       },
     },
@@ -157,9 +219,7 @@ export const theme = createTheme({
     },
 
     MuiTableHead: {
-      styleOverrides: {
-        root: { backgroundColor: '#F6F8FB' },
-      },
+      styleOverrides: { root: { backgroundColor: '#F5F7F9' } },
     },
   },
 })

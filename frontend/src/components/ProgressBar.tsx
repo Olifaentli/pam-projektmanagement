@@ -1,5 +1,5 @@
 import { Box, LinearProgress, Tooltip, Typography } from '@mui/material'
-import { STATUS_COLORS } from '../theme'
+import { STATUS_ACCENT, STATUS_COLORS } from '../theme'
 import type { Progress } from '../api/types'
 
 /**
@@ -8,19 +8,20 @@ import type { Progress } from '../api/types'
  * Zeigt neben dem Balken immer auch die absoluten Zahlen: ein Prozentwert
  * allein laesst offen, ob 50 % aus zwei oder aus zweihundert Aufgaben stammen.
  *
- * Die Balkenfarbe folgt derselben Ampellogik wie die Aufgabenstatus, damit
- * Farbe in der ganzen Anwendung dasselbe bedeutet: grau solange nichts
- * erledigt ist, orange waehrend der Bearbeitung, gruen bei Abschluss.
+ * Die Farbe folgt derselben Ampellogik wie die Aufgabenstatus. Balken und
+ * Prozenttext verwenden dabei unterschiedliche Toene: der Balken die weichere
+ * Flaechenfarbe, die Zahl den kraeftigeren Akzent - kleine Schrift braucht
+ * mehr Kontrast als eine Flaeche.
  */
-function barColor(percent: number, total: number): string {
-  if (total === 0 || percent === 0) return STATUS_COLORS.OPEN.main
-  if (percent >= 100) return STATUS_COLORS.DONE.main
-  return STATUS_COLORS.IN_PROGRESS.main
+function statusOf(percent: number, total: number): keyof typeof STATUS_COLORS {
+  if (total === 0 || percent === 0) return 'OPEN'
+  if (percent >= 100) return 'DONE'
+  return 'IN_PROGRESS'
 }
 
-export function ProgressBar({ progress }: { progress: Progress }) {
+export function ProgressBar({ progress, height = 6 }: { progress: Progress; height?: number }) {
   const { total, done, percentDone } = progress
-  const color = barColor(percentDone, total)
+  const status = statusOf(percentDone, total)
 
   return (
     <Box>
@@ -28,7 +29,7 @@ export function ProgressBar({ progress }: { progress: Progress }) {
         <Typography variant="body2" color="text.secondary">
           Fortschritt
         </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 700, color }}>
+        <Typography variant="body2" sx={{ fontWeight: 700, color: STATUS_ACCENT[status] }}>
           {percentDone} %
         </Typography>
       </Box>
@@ -36,7 +37,10 @@ export function ProgressBar({ progress }: { progress: Progress }) {
         <LinearProgress
           variant="determinate"
           value={percentDone}
-          sx={{ height: 9, '& .MuiLinearProgress-bar': { backgroundColor: color } }}
+          sx={{
+            height,
+            '& .MuiLinearProgress-bar': { backgroundColor: STATUS_COLORS[status].main },
+          }}
           aria-label={`Fortschritt ${percentDone} Prozent, ${done} von ${total} Aufgaben erledigt`}
         />
       </Tooltip>

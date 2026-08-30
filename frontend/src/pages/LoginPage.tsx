@@ -54,9 +54,9 @@ export function LoginPage() {
         // Verlauf in den Markenfarben statt einer leeren Flaeche. Die
         // Anmeldeseite ist der erste Eindruck der Anwendung.
         background:
-          'radial-gradient(1200px 600px at 15% 10%, #1B4E7C 0%, transparent 55%),' +
-          'radial-gradient(900px 500px at 85% 90%, #0E8074 0%, transparent 50%),' +
-          'linear-gradient(140deg, #0A2440 0%, #123A5F 60%, #10405F 100%)',
+          'radial-gradient(1100px 560px at 15% 10%, #3B5C7C 0%, transparent 55%),' +
+          'radial-gradient(900px 500px at 85% 90%, #157F73 0%, transparent 50%),' +
+          'linear-gradient(140deg, #1E3247 0%, #2E4A66 60%, #27526B 100%)',
       }}
     >
       <Paper
@@ -75,7 +75,7 @@ export function LoginPage() {
             height: 5,
             borderRadius: 999,
             mb: 2.5,
-            background: 'linear-gradient(90deg, #123A5F 0%, #0E8074 100%)',
+            background: 'linear-gradient(90deg, #2E4A66 0%, #157F73 100%)',
           }}
         />
         <Typography variant="h1" gutterBottom>
